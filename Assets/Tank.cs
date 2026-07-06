@@ -10,6 +10,8 @@ public class Tank : MonoBehaviour
     private Transform _transform;
     private AudioSource _audioSource;
     private Sprite _bulletSprite;
+    private Camera _camera;
+    private float _boundsMargin;
     private float _fireCooldown;
 
     void Start()
@@ -17,6 +19,11 @@ public class Tank : MonoBehaviour
         _transform = GetComponent<Transform>();
         _audioSource = GetComponent<AudioSource>();
         _bulletSprite = Resources.Load<Sprite>("bullet");
+        _camera = Camera.main;
+
+        // Same margin works for every facing: rotating in 90-degree steps always
+        // puts the sprite's original width along whichever axis the tank is moving on.
+        _boundsMargin = GetComponent<SpriteRenderer>().sprite.bounds.extents.x * _transform.localScale.x;
 
         gameObject.tag = "Player";
         if (GetComponent<Collider2D>() == null)
@@ -28,6 +35,11 @@ public class Tank : MonoBehaviour
         if (Object.FindFirstObjectByType<GameManager>() == null)
         {
             new GameObject("GameManager").AddComponent<GameManager>();
+        }
+
+        if (Object.FindFirstObjectByType<MainMenu>() == null)
+        {
+            new GameObject("MainMenu").AddComponent<MainMenu>();
         }
     }
 
@@ -51,10 +63,19 @@ public class Tank : MonoBehaviour
             Fire();
         }
 
+        float halfHeight = _camera.orthographicSize;
+        float halfWidth = halfHeight * _camera.aspect;
+        Vector3 camPos = _camera.transform.position;
+
+        float maxY = camPos.y + halfHeight - _boundsMargin;
+        float minY = camPos.y - halfHeight + _boundsMargin;
+        float maxX = camPos.x + halfWidth - _boundsMargin;
+        float minX = camPos.x - halfWidth + _boundsMargin;
+
         if (Input.GetKey(KeyCode.W))
         {
             _transform.rotation = Quaternion.Euler(0, 0, 90);
-            if (_transform.position.y > 4.1f)
+            if (_transform.position.y > maxY)
             {
                 return;
             }
@@ -63,7 +84,7 @@ public class Tank : MonoBehaviour
         else if (Input.GetKey(KeyCode.S))
         {
             _transform.rotation = Quaternion.Euler(0, 0, 270);
-            if (_transform.position.y < -4.2f)
+            if (_transform.position.y < minY)
             {
                 return;
             }
@@ -72,7 +93,7 @@ public class Tank : MonoBehaviour
         else if (Input.GetKey(KeyCode.A))
         {
             _transform.rotation = Quaternion.Euler(0, 0, 180);
-            if (_transform.position.x < -7.8f)
+            if (_transform.position.x < minX)
             {
                 return;
             }
@@ -81,7 +102,7 @@ public class Tank : MonoBehaviour
         else if (Input.GetKey(KeyCode.D))
         {
             _transform.rotation = Quaternion.Euler(0, 0, 0);
-            if (_transform.position.x > 8.2f)
+            if (_transform.position.x > maxX)
             {
                 return;
             }
