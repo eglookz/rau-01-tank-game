@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Tank : MonoBehaviour
 {
@@ -25,6 +24,11 @@ public class Tank : MonoBehaviour
             var collider = gameObject.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
         }
+
+        if (Object.FindFirstObjectByType<GameManager>() == null)
+        {
+            new GameObject("GameManager").AddComponent<GameManager>();
+        }
     }
 
     void Update()
@@ -47,11 +51,7 @@ public class Tank : MonoBehaviour
             Fire();
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
-        else if (Input.GetKey(KeyCode.W))
+        if (Input.GetKey(KeyCode.W))
         {
             _transform.rotation = Quaternion.Euler(0, 0, 90);
             if (_transform.position.y > 4.1f)
@@ -97,21 +97,6 @@ public class Tank : MonoBehaviour
         Vector2 direction = _transform.right;
         Vector3 spawnPosition = _transform.position + (Vector3)direction * BulletSpawnOffset;
 
-        var bulletObject = new GameObject("bullet");
-        bulletObject.transform.position = spawnPosition;
-        bulletObject.transform.rotation = _transform.rotation;
-
-        var renderer = bulletObject.AddComponent<SpriteRenderer>();
-        renderer.sprite = _bulletSprite;
-
-        var rigidbody = bulletObject.AddComponent<Rigidbody2D>();
-        rigidbody.bodyType = RigidbodyType2D.Kinematic;
-        rigidbody.gravityScale = 0f;
-
-        var collider = bulletObject.AddComponent<CircleCollider2D>();
-        collider.isTrigger = true;
-
-        var bullet = bulletObject.AddComponent<Bullet>();
-        bullet.Init(direction, BulletSpeed, BulletLifetime);
+        Bullet.Spawn(spawnPosition, _transform.rotation, direction, "Player", _bulletSprite, BulletSpeed, BulletLifetime);
     }
 }
