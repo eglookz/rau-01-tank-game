@@ -14,13 +14,15 @@
 # Leftover build output specific to this project
 /Out/
 
-# Visual Studio / Rider cache
+# Visual Studio / Rider / VS Code cache
 .vs/
+.vscode/
 .idea/
 ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
